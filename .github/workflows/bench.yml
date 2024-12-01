@@ -52,7 +52,7 @@ jobs:
           for project in ${{ steps.changed-projects.outputs.changed_projects }}; do
             # Run hyperfine and capture output
             a = $(hyperfine ./$project/target/release/$project --export-markdown ./$project/benchmark-results.md)
-            b = $(sed ':a;N;$!ba;s/\n/\\n/g' $a)
+            b = $(echo "$a" | sed ':a;N;$!ba;s/\n/\\n/g')
             escaped_output=$(sed ':a;N;$!ba;s/\n/\\n/g' ./$project/benchmark-results.md)
             
             # Construct the message payload (JSON)
