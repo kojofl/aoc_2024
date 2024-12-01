@@ -41,7 +41,6 @@ jobs:
 
       - name: Build projects
         run: |
-          ls -l
           for project in ${{ steps.changed-projects.outputs.changed_projects }}; do
             cd $project
             cargo build --release
@@ -49,7 +48,6 @@ jobs:
 
       - name: Run benchmarks with hyperfine
         run: |
-          ls -l
           for project in ${{ steps.changed-projects.outputs.changed_projects }}; do
             cd $project
             hyperfine ./target/release/$project --export-markdown benchmark-results.md 
