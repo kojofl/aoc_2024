@@ -9,62 +9,43 @@ jobs:
   benchmark:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
-
-      - name: Install stable Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
-
-      - name: Cache cargo registry
+          fetch-depth: 0
+      - name: Cache hyperfine
         uses: actions/cache@v3
         with:
-          path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          path: ~/.cargo/bin
+          key: ${{ runner.os }}-hyperfine
           restore-keys: |
-            ${{ runner.os }}-cargo-registry-
+            ${{ runner.os }}-hyperfine-
 
-      - name: Cache cargo index
-        uses: actions/cache@v3
-        with:
-          path: ~/.cargo/git
-          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-index-
-
-      - name: Cache target directory
-        uses: actions/cache@v3
-        with:
-          path: target
-          key: ${{ runner.os }}-target-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-target-
-
-      - name: Install hyperfine
+      - name: Install hyperfine (if not cached)
         run: |
-          cargo install hyperfine
+          if [ ! -f ~/.cargo/bin/hyperfine ]; then
+            cargo install hyperfine
+          fi
 
       - name: Find changed projects
         id: changed-projects
         run: |
-          CHANGED_FILES=$(git diff --name-only HEAD^)
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} HEAD)
           CHANGED_PROJECTS=$(echo "$CHANGED_FILES" | grep -E 'day_[0-9]+' | awk -F/ '{print $1}')
           echo "changed_projects=$CHANGED_PROJECTS" >> $GITHUB_OUTPUT
 
+
       - name: Build projects
         run: |
-          for project in ${{ steps.changed-projects.outputs.changed_projects }}; do
+          ls -l
+          for project in $(ls -d day_*); do
             cd $project
             cargo build --release
           done
 
       - name: Run benchmarks with hyperfine
         run: |
-          for project in ${{ steps.changed_projects.outputs.changed_projects }}; do
+          ls -l
+          for project in $(ls -d day_*); do
             cd $project
             hyperfine ./target/release/$project --export-markdown benchmark-results.md 
           done
