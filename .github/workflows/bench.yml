@@ -1,0 +1,64 @@
+name: Benchmark
+
+on:
+  push:
+    branches:
+      - main  # Or your main branch name
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 
+
+      - name: Install stable Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - name: Cache cargo registry
+        uses: actions/cache@v3  
+
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+
+      - name: Cache cargo index
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-index-
+
+      - name: Cache target directory
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ runner.os }}-target-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-target-
+
+      - name: Install hyperfine
+        run: |
+          cargo install hyperfine
+
+      - name: Find changed projects
+        id: changed-projects
+        run: |
+          CHANGED_FILES=$(git diff --name-only HEAD^)
+          CHANGED_PROJECTS=$(echo "$CHANGED_FILES" | grep -E 'project1|project2|projectN' | awk -F/ '{print $1}')
+          echo "changed_projects=$CHANGED_PROJECTS" >> $GITHUB_OUTPUT
+
+      - name: Run benchmarks with hyperfine
+        run: |
+          for project in ${{ steps.changed-projects.outputs.changed_projects }}; do
+            cd $project
+            hyperfine "cargo bench --no-default-features" --export-markdown benchmark-results.md 
+          done
