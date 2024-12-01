@@ -21,8 +21,7 @@ jobs:
           override: true
 
       - name: Cache cargo registry
-        uses: actions/cache@v3  
-
+        uses: actions/cache@v3
         with:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
@@ -53,12 +52,19 @@ jobs:
         id: changed-projects
         run: |
           CHANGED_FILES=$(git diff --name-only HEAD^)
-          CHANGED_PROJECTS=$(echo "$CHANGED_FILES" | grep -E 'project1|project2|projectN' | awk -F/ '{print $1}')
+          CHANGED_PROJECTS=$(echo "$CHANGED_FILES" | grep -E 'day_[0-9]+' | awk -F/ '{print $1}')
           echo "changed_projects=$CHANGED_PROJECTS" >> $GITHUB_OUTPUT
 
-      - name: Run benchmarks with hyperfine
+      - name: Build projects
         run: |
           for project in ${{ steps.changed-projects.outputs.changed_projects }}; do
             cd $project
-            hyperfine "cargo bench --no-default-features" --export-markdown benchmark-results.md 
+            cargo build --release
+          done
+
+      - name: Run benchmarks with hyperfine
+        run: |
+          for project in ${{ steps.changed_projects.outputs.changed_projects }}; do
+            cd $project
+            hyperfine ./target/release/$project --export-markdown benchmark-results.md 
           done
