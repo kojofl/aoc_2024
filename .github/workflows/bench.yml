@@ -44,21 +44,20 @@ jobs:
           for project in ${{ steps.changed-projects.outputs.changed_projects }}; do
             cd $project
             cargo build --release
+            cd ..
           done
 
       - name: Run benchmarks with hyperfine
         run: |
           for project in ${{ steps.changed-projects.outputs.changed_projects }}; do
-            cd $project
-            hyperfine ./target/release/$project --export-markdown benchmark-results.md 
+            hyperfine ./$project/target/release/$project --export-markdown benchmark-results.md 
           done
 
       - name: Run benchmarks and send to Discord
         run: |
-          for project in $(ls -d day_*); do
-            cd $project
+          for project in ${{ steps.changed-projects.outputs.changed_projects }}; do
             # Run hyperfine and capture output
-            benchmark_output=$(hyperfine ./target/release/$project --export-markdown benchmark-results.md) 
+            benchmark_output=$(hyperfine ./$project/target/release/$project --export-markdown benchmark-results.md) 
             
             # Construct the message payload (JSON)
             message=$(jq -n \
@@ -71,5 +70,4 @@ jobs:
                  -X POST \
                  -d "$message" \
                  https://discord.com/api/webhooks/1180483115236466688/wTBQ89FIePIDrHCmClk-JSVH6UNudULplyp33oOcrzD-LH1zvCOqKRnizwxEWWbiMFOj
-            cd ..
           done
