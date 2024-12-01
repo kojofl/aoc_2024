@@ -63,8 +63,8 @@ jobs:
             # Construct the message payload (JSON)
             message=$(jq -n \
               --arg project $project \
-              --arg content $escaped_output \
-              '{content: "Benchmark results for **$project**:\n```\n$content\n```"}')
+              --arg content $benchmark_output \
+              '{content: "Benchmark results for **\($project)**:\n```\($content)```"}')
             
             # Send the message using curl
             curl -H "Content-Type: application/json" \
