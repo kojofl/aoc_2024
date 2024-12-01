@@ -57,14 +57,14 @@ jobs:
 
       - name: Build projects
         run: |
-          for project in ${{ steps.changed-projects.outputs.changed_projects }}; do
+          for project in $(ls -d day_*); do # Loop through all day_* directories
             cd $project
             cargo build --release
           done
 
       - name: Run benchmarks with hyperfine
         run: |
-          for project in ${{ steps.changed_projects.outputs.changed_projects }}; do
+          for project in $(ls -d day_*); do
             cd $project
             hyperfine ./target/release/$project --export-markdown benchmark-results.md 
           done
