@@ -13,6 +13,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cargo/bin
+          key: ${{ runner.os }}-hyperfine
           restore-keys: |
             ${{ runner.os }}-hyperfine-
 
