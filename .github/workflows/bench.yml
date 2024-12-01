@@ -24,6 +24,14 @@ jobs:
             cargo install hyperfine
           fi
 
+      - name: Find changed projects
+        id: changed-projects
+        run: |
+          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} HEAD)
+          CHANGED_PROJECTS=$(echo "$CHANGED_FILES" | grep -E 'day_[0-9]+' | awk -F/ '{print $1}')
+          echo "changed_projects=$CHANGED_PROJECTS" >> $GITHUB_OUTPUT
+
+
       - name: Build projects
         run: |
           ls -l
