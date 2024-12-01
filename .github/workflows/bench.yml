@@ -52,15 +52,24 @@ jobs:
             cd $project
             hyperfine ./target/release/$project --export-markdown benchmark-results.md 
           done
-      - name: Send benchmark results to Discord
+
+      - name: Run benchmarks and send to Discord
         run: |
           for project in $(ls -d day_*); do
             cd $project
+            # Run hyperfine and capture output
+            benchmark_output=$(hyperfine ./target/release/$project --export-markdown benchmark-results.md) 
+            
             # Construct the message payload (JSON)
-            message='{"content": "Benchmark results for **$project**:\n```markdown\n$content\n```"}'
+            message=$(jq -n \
+              --arg project $project \
+              --arg content $benchmark_output \
+              '{content: "Benchmark results for **$project**:\n```\n$content\n```"}')
+            
             # Send the message using curl
             curl -H "Content-Type: application/json" \
                  -X POST \
                  -d "$message" \
-                 https://discord.com/api/webhooks/1180483115236466688/wTBQ89FIePIDrHCmClk-JSVH6UNudULplyp33oOcrzD-LH1zvCOqKRnizwxEWWbiMFOj
+                 YOUR_DISCORD_WEBHOOK_URL
+            cd ..
           done
