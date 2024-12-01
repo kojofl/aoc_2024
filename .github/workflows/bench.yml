@@ -9,6 +9,7 @@ jobs:
   benchmark:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Cache hyperfine
         uses: actions/cache@v3
         with:
