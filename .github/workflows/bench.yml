@@ -59,6 +59,7 @@ jobs:
             # Construct the message payload (JSON)
             message=$(jq -n \
               --arg project "$project" \
+              --arg sender "1180483115236466688" \
               --arg content "$(cat benchmark-results.md)" \
               '{content: "Benchmark results for **$project**:\n```markdown\n$content\n```"}')
             # Send the message using curl
