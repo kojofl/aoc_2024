@@ -58,5 +58,5 @@ jobs:
             curl -H "Content-Type: application/json" \
                  -X POST \
                  -d "$message" \
-                 ${{ secrets.DISCORD_URL }}
+                 ${{ vars.DISCORD_URL }}
           done
