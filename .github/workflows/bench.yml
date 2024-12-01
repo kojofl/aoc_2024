@@ -47,22 +47,16 @@ jobs:
             cd ..
           done
 
-      - name: Run benchmarks with hyperfine
-        run: |
-          for project in ${{ steps.changed-projects.outputs.changed_projects }}; do
-            hyperfine ./$project/target/release/$project --export-markdown benchmark-results.md 
-          done
-
       - name: Run benchmarks and send to Discord
         run: |
           for project in ${{ steps.changed-projects.outputs.changed_projects }}; do
             # Run hyperfine and capture output
-            hyperfine ./$project/target/release/$project --export-markdown ./$project/benchmark-results.md
+            a = $(hyperfine ./$project/target/release/$project --export-markdown ./$project/benchmark-results.md)
+            b = $(sed ':a;N;$!ba;s/\n/\\n/g' $a)
             escaped_output=$(sed ':a;N;$!ba;s/\n/\\n/g' ./$project/benchmark-results.md)
-            echo $escaped_output
             
             # Construct the message payload (JSON)
-            message="{\"content\": \"Benchmark results for **$project**:\n\`\`\`\n$escaped_output\n\`\`\`\"}"
+            message="{\"content\": \"Benchmark results for **$project**:\n\`\`\`\n$b\n\`\`\`\"}"
             
             # Send the message using curl
             curl -H "Content-Type: application/json" \
