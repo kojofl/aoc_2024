@@ -17,7 +17,7 @@ fn main() {
     let mut diff = 0;
     let mut res = 0;
     let mut occurance = 0;
-    let mut last_left = -1;
+    let mut last_left = 0;
     for (a, b) in left.iter().zip(right.iter()) {
         diff += (a - b).abs();
         if *a != last_left {
