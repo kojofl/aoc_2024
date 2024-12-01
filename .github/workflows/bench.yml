@@ -60,10 +60,7 @@ jobs:
             benchmark_output=$(hyperfine ./$project/target/release/$project) 
             
             # Construct the message payload (JSON)
-            message=$(jq -n \
-              --arg project $project \
-              --arg content $benchmark_output \
-              '{content: \"Benchmark results for **\($project)**:\n\($content)\"}')
+            message="{\"content\": \"Benchmark results for **$project**:\n\`\`\`\n$benchmark_output\n\`\`\`\"}"
             
             # Send the message using curl
             curl -H "Content-Type: application/json" \
