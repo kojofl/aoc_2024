@@ -57,14 +57,13 @@ jobs:
         run: |
           for project in ${{ steps.changed-projects.outputs.changed_projects }}; do
             # Run hyperfine and capture output
-            benchmark_output=$(hyperfine ./$project/target/release/$project --export-markdown benchmark-results.md) 
-            escaped_output=$(echo "$benchmark_output" | sed 's/`/\\`/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+            benchmark_output=$(hyperfine ./$project/target/release/$project) 
             
             # Construct the message payload (JSON)
             message=$(jq -n \
               --arg project $project \
-              --arg content $escaped_output \
-              '{content: "Benchmark results for **\($project)**:\n```\($content)```"}')
+              --arg content $benchmark_output \
+              '{content: "Benchmark results for **\($project)**:\n\($content)"}')
             
             # Send the message using curl
             curl -H "Content-Type: application/json" \
