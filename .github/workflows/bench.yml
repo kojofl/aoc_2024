@@ -36,7 +36,7 @@ jobs:
 
       - name: Print changed projects
         run: |
-          echo "${{ steps.changed-projects.outputs.changed_projects }}"
+          echo "Changed projects: ${{ steps.changed-projects.outputs.changed_projects }}"
 
 
       - name: Build projects
