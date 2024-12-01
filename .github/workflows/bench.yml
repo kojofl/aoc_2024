@@ -24,7 +24,7 @@ jobs:
 
       - name: Build projects
         run: |
-          for project in $(ls -d day_*); do # Loop through all day_* directories
+          for project in $(ls -d day_*); do
             cd $project
             cargo build --release
           done
