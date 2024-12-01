@@ -59,12 +59,11 @@ jobs:
             # Construct the message payload (JSON)
             message=$(jq -n \
               --arg project "$project" \
-              --arg sender "1180483115236466688" \
               --arg content "$(cat benchmark-results.md)" \
               '{content: "Benchmark results for **$project**:\n```markdown\n$content\n```"}')
             # Send the message using curl
             curl -H "Content-Type: application/json" \
                  -X POST \
                  -d "$message" \
-                 https://discord.com/api/webhooks/1180483115236466688/wTBQ89FIePIDrHCmClk-JSVH6UNudULplyp33oOcrzD-LH1zvCOqKRnizwxEWWbiMFOj/github
+                 https://discord.com/api/webhooks/1180483115236466688/wTBQ89FIePIDrHCmClk-JSVH6UNudULplyp33oOcrzD-LH1zvCOqKRnizwxEWWbiMFOj
           done
