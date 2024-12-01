@@ -34,6 +34,11 @@ jobs:
           echo "changed_projects=$CHANGED_PROJECTS" >> $GITHUB_OUTPUT
 
 
+      - name: Print changed projects
+        run: |
+          echo "${{ steps.changed-projects.outputs.changed_projects }}"
+
+
       - name: Build projects
         run: |
           ls -l
