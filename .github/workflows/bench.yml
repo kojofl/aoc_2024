@@ -9,16 +9,18 @@ jobs:
   benchmark:
     runs-on: ubuntu-latest
     steps:
-      - name: Install hyperfine
-        run: |
-          cargo install hyperfine
+      - name: Cache hyperfine
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/bin
+          restore-keys: |
+            ${{ runner.os }}-hyperfine-
 
-      - name: Find changed projects
-        id: changed-projects
+      - name: Install hyperfine (if not cached)
         run: |
-          CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} HEAD)
-          CHANGED_PROJECTS=$(echo "$CHANGED_FILES" | grep -E 'day_[0-9]+' | awk -F/ '{print $1}')
-          echo "changed_projects=$CHANGED_PROJECTS" >> $GITHUB_OUTPUT
+          if [ ! -f ~/.cargo/bin/hyperfine ]; then
+            cargo install hyperfine
+          fi
 
       - name: Build projects
         run: |
