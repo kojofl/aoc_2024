@@ -63,7 +63,7 @@ jobs:
             message=$(jq -n \
               --arg project $project \
               --arg content $benchmark_output \
-              '{content: "Benchmark results for **\($project)**:\n\($content)"}')
+              '{content: \"Benchmark results for **\($project)**:\n\($content)\"}')
             
             # Send the message using curl
             curl -H "Content-Type: application/json" \
