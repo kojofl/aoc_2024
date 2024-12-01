@@ -51,7 +51,7 @@ jobs:
         run: |
           for project in ${{ steps.changed-projects.outputs.changed_projects }}; do
             output=$(hyperfine --warmup 10 ./$project/target/release/$project)
-            escaped_output=$(echo "$a" | sed ':a;N;$!ba;s/\n/\\n/g')
+            escaped_output=$(echo "$output" | sed ':a;N;$!ba;s/\n/\\n/g')
             
             message="{\"content\": \"Benchmark results for **$project**:\n\`\`\`\n$escaped_output\n\`\`\`\"}"
             
