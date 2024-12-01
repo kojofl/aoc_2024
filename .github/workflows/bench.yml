@@ -25,6 +25,7 @@ jobs:
 
       - name: Build projects
         run: |
+          pwd
           for project in $(ls -d day_*); do
             cd $project
             cargo build --release
@@ -32,6 +33,7 @@ jobs:
 
       - name: Run benchmarks with hyperfine
         run: |
+          pwd
           for project in $(ls -d day_*); do
             cd $project
             hyperfine ./target/release/$project --export-markdown benchmark-results.md 
