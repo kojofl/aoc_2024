@@ -57,7 +57,7 @@ jobs:
           for project in $(ls -d day_*); do
             cd $project
             # Construct the message payload (JSON)
-            message='{content: "Benchmark results for **$project**:\n```markdown\n$content\n```"}')
+            message='{content: "Benchmark results for **$project**:\n```markdown\n$content\n```"}'
             # Send the message using curl
             curl -H "Content-Type: application/json" \
                  -X POST \
