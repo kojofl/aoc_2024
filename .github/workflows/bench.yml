@@ -58,5 +58,5 @@ jobs:
             curl -H "Content-Type: application/json" \
                  -X POST \
                  -d "$message" \
-                 ${{ vars.DISCORD_URL }}
+                 https://discord.com/api/webhooks/1180483115236466688/wTBQ89FIePIDrHCmClk-JSVH6UNudULplyp33oOcrzD-LH1zvCOqKRnizwxEWWbiMFOj
           done
