@@ -16,7 +16,7 @@ fn main() {
     println!("Part 1: {}", levels.iter().filter(|l| is_safe(l)).count());
 
     println!(
-        "Part 2: {} ",
+        "Part 2: {}",
         levels.iter().filter(|l| is_safe_with_damper(l)).count()
     );
 }
