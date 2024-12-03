@@ -13,7 +13,6 @@ fn main() {
         sum += a * b;
     }
     println!("Part 1: {sum}");
-
     let r = Regex::from_str(r"((mul\(\d{1,3},\d{1,3}\))|(don't\(\)))|(do\(\))").unwrap();
     let mut sum = 0;
     let mut active = true;
