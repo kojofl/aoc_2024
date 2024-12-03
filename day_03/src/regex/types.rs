@@ -340,14 +340,6 @@ impl RegexBlock {
         }
         None
     }
-
-    pub(crate) fn matches_with_rest<'a>(&self, s: &'a str) -> Option<(&'a str, &'a str)> {
-        if let Some(rest) = matches_inner(self.inner.as_slices().0, s) {
-            let len = s.len() - rest.len();
-            return Some((&s[..len], rest));
-        }
-        None
-    }
 }
 
 /// Matches the regex block against a string slice recursively the return value if present is the
