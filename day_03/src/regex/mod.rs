@@ -1,5 +1,4 @@
 mod types;
-
 use self::types::{RegexBlock, RegexError};
 
 #[derive(Debug, Clone)]
