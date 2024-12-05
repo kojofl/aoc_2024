@@ -1,7 +1,6 @@
 use std::{
     cmp::Ordering,
     collections::{HashMap, HashSet},
-    u32,
 };
 // const INPUT: &'static str = include_str!("../test");
 const INPUT: &'static str = include_str!("../input");
@@ -20,40 +19,30 @@ fn main() {
             })
             .or_insert(HashSet::from([v]));
     }
-    let part_1 = lines.clone();
-    println!(
-        "{}",
-        part_1
-            .map(|page| {
-                page.split(',')
-                    .map(|n| n.parse::<u32>().unwrap())
-                    .collect::<Vec<u32>>()
-            })
-            .filter(|v| is_ordered(v.as_slice(), &preconditions))
-            .fold(0, |acc, valid_page| acc + valid_page[valid_page.len() / 2])
-    );
-    println!(
-        "{}",
-        lines
-            .map(|page| {
-                page.split(',')
-                    .map(|n| n.parse::<u32>().unwrap())
-                    .collect::<Vec<u32>>()
-            })
-            .filter(|v| !is_ordered(v.as_slice(), &preconditions))
-            .map(|unordered| {
-                let mut sorted = unordered
-                    .iter()
-                    .map(|n| Token {
-                        val: *n,
+
+    let (part_1, part_2) = lines
+        .map(|page| {
+            page.split(',')
+                .map(|n| {
+                    let n = n.parse::<u32>().unwrap();
+                    Token {
+                        val: n,
                         rules: preconditions.get(&n),
-                    })
-                    .collect::<Vec<Token>>();
-                sorted.sort();
-                sorted[sorted.len() / 2].val
-            })
-            .sum::<u32>()
-    );
+                    }
+                })
+                .collect::<Vec<Token>>()
+        })
+        .fold((0, 0), |acc, mut page| {
+            if is_ordered(&page) {
+                (acc.0 + page[page.len() / 2].val, acc.1)
+            } else {
+                page.sort();
+                (acc.0, acc.1 + page[page.len() / 2].val)
+            }
+        });
+
+    println!("Part 1: {}", part_1);
+    println!("Part 2: {}", part_2);
 }
 
 #[derive(PartialEq, Eq)]
@@ -80,15 +69,15 @@ impl PartialOrd for Token<'_> {
     }
 }
 
-fn is_ordered(page: &[u32], rules: &HashMap<u32, HashSet<u32>>) -> bool {
+fn is_ordered(page: &[Token]) -> bool {
     let mut used = HashSet::new();
     for el in page {
-        if let Some(set) = rules.get(el) {
+        if let Some(set) = el.rules {
             if !set.is_disjoint(&used) {
                 return false;
             }
         }
-        used.insert(*el);
+        used.insert(el.val);
     }
     true
 }
