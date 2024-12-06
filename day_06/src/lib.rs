@@ -1,8 +1,8 @@
 use std::usize;
 
 pub struct Map {
-    pub field: Vec<Vec<Field>>,
-    pub guard: Guard,
+    field: Vec<Vec<Field>>,
+    guard: Guard,
 }
 
 impl Map {
@@ -20,28 +20,28 @@ impl Map {
                             pos: (i, j),
                             dir: Direction::Left,
                         });
-                        row.push(Field::Visited(vec![Direction::Left]));
+                        row.push(Field::Visited(BitMap::new(Direction::Left)));
                     }
                     '>' => {
                         guard = Some(Guard {
                             pos: (i, j),
                             dir: Direction::Right,
                         });
-                        row.push(Field::Visited(vec![Direction::Right]));
+                        row.push(Field::Visited(BitMap::new(Direction::Right)));
                     }
                     '^' => {
                         guard = Some(Guard {
                             pos: (i, j),
                             dir: Direction::Up,
                         });
-                        row.push(Field::Visited(vec![Direction::Up]))
+                        row.push(Field::Visited(BitMap::new(Direction::Up)))
                     }
                     'v' => {
                         guard = Some(Guard {
                             pos: (i, j),
                             dir: Direction::Down,
                         });
-                        row.push(Field::Visited(vec![Direction::Down]));
+                        row.push(Field::Visited(BitMap::new(Direction::Down)));
                     }
                     _ => unreachable!(),
                 }
@@ -71,12 +71,12 @@ impl Map {
                 }
             }
             match (&mut self.field[next.0][next.1], self.guard.dir) {
-                (Field::Visited(vec), dir) => {
+                (Field::Visited(b), dir) => {
                     self.guard.pos = next;
-                    vec.push(dir);
+                    b.set_visited(dir);
                 }
                 (Field::Unvisited, dir) => {
-                    self.field[next.0][next.1] = Field::Visited(vec![dir]);
+                    self.field[next.0][next.1] = Field::Visited(BitMap::new(dir));
                     self.guard.pos = next;
                 }
                 (Field::Blocked, _) => {
@@ -112,14 +112,14 @@ impl Map {
                 guard.rotate();
             }
             match (&mut field[guard.pos.0][guard.pos.1], guard.dir) {
-                (Field::Visited(vec), dir) => {
-                    if vec.contains(&dir) {
+                (Field::Visited(b), dir) => {
+                    if b.has_visited(&dir) {
                         return true;
                     }
-                    vec.push(dir);
+                    b.set_visited(dir);
                 }
                 (Field::Unvisited, dir) => {
-                    field[next.0][next.1] = Field::Visited(vec![dir]);
+                    field[next.0][next.1] = Field::Visited(BitMap::new(dir));
                 }
                 _ => {}
             }
@@ -128,7 +128,7 @@ impl Map {
 }
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-pub struct Guard {
+struct Guard {
     pub pos: (usize, usize),
     pub dir: Direction,
 }
@@ -145,10 +145,10 @@ impl Guard {
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
+    Up = 0b00000001,
+    Down = 0b00000010,
+    Left = 0b00000100,
+    Right = 0b00001000,
 }
 
 impl Direction {
@@ -167,8 +167,25 @@ impl Direction {
 }
 
 #[derive(PartialEq, Eq, Clone, Debug)]
-pub enum Field {
-    Visited(Vec<Direction>),
+enum Field {
+    Visited(BitMap),
     Unvisited,
     Blocked,
+}
+
+#[derive(PartialEq, Eq, Clone, Debug)]
+struct BitMap(u8);
+
+impl BitMap {
+    fn new(dir: Direction) -> Self {
+        Self(dir as u8)
+    }
+
+    fn set_visited(&mut self, dir: Direction) {
+        self.0 |= dir as u8
+    }
+
+    fn has_visited(&self, dir: &Direction) -> bool {
+        self.0 & *dir as u8 != 0
+    }
 }
