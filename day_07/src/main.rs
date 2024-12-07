@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, usize};
+use std::{cmp::Ordering::*, collections::VecDeque, usize};
 
 // static INPUT: &'static str = include_str!("../test");
 static INPUT: &'static str = include_str!("../input");
@@ -36,13 +36,9 @@ impl OperationFacility {
         state_queue.push_back(OperationState::new(1, self.operands[0]));
 
         while let Some(state) = state_queue.pop_front() {
-            if state.val_idx >= self.operands.len() {
-                if self.target == state.state {
-                    return true;
-                }
-            } else {
-                let val = self.operands[state.val_idx];
-                state.advance_state(&mut state_queue, val, self.target);
+            let val = self.operands[state.val_idx];
+            if state.advance_state(&mut state_queue, val, self.target, self.operands.len() - 1) {
+                return true;
             }
         }
         false
@@ -63,22 +59,50 @@ impl OperationState {
         }
     }
 
-    fn advance_state(self, queue: &mut VecDeque<OperationState>, val: u64, target: u64) {
+    fn advance_state(
+        self,
+        queue: &mut VecDeque<OperationState>,
+        val: u64,
+        target: u64,
+        opperand_count: usize,
+    ) -> bool {
         // Add
         let add = self.state + val;
-        if add <= target {
-            queue.push_back(OperationState::new(self.val_idx + 1, add));
+        match (add.cmp(&target), self.val_idx.cmp(&opperand_count)) {
+            (Equal, Equal) => {
+                return true;
+            }
+            (Less | Equal, Less) => {
+                queue.push_back(OperationState::new(self.val_idx + 1, add));
+            }
+            (_, Greater) => unreachable!(),
+            _ => {}
         }
         // Mul
         let mul = self.state * val;
-        if mul <= target {
-            queue.push_back(OperationState::new(self.val_idx + 1, mul));
+        match (mul.cmp(&target), self.val_idx.cmp(&opperand_count)) {
+            (Equal, Equal) => {
+                return true;
+            }
+            (Less | Equal, Less) => {
+                queue.push_back(OperationState::new(self.val_idx + 1, mul));
+            }
+            (_, Greater) => unreachable!(),
+            _ => {}
         }
         // Concat
         let con = concat_nums(self.state, val);
-        if con <= target {
-            queue.push_back(OperationState::new(self.val_idx + 1, con));
+        match (con.cmp(&target), self.val_idx.cmp(&opperand_count)) {
+            (Equal, Equal) => {
+                return true;
+            }
+            (Less | Equal, Less) => {
+                queue.push_back(OperationState::new(self.val_idx + 1, con));
+            }
+            (_, Greater) => unreachable!(),
+            _ => {}
         }
+        false
     }
 }
 
