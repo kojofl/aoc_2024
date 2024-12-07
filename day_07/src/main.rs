@@ -79,9 +79,7 @@ impl OperationState {
             queue.push_back(OperationState::new(self.val_idx + 1, mul));
         }
         // Concat
-        let mut con = self.state.to_string();
-        con.push_str(val.to_string().as_str());
-        let con = con.parse::<u64>().unwrap();
+        let con = concat_nums(self.state, val);
         if con == target {
             return true;
         }
@@ -90,4 +88,9 @@ impl OperationState {
         }
         false
     }
+}
+
+fn concat_nums(l: u64, r: u64) -> u64 {
+    let l = l << (r as f64).log10().floor() as u32;
+    l + r
 }
