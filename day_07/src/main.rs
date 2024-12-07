@@ -36,13 +36,11 @@ impl OperationFacility {
         state_queue.push_back(OperationState::new(1, self.operands[0]));
 
         while let Some(state) = state_queue.pop_front() {
-            if state.val_idx >= self.operands.len() {
-                if self.target == state.state {
+            if state.val_idx < self.operands.len() {
+                let val = self.operands[state.val_idx];
+                if state.advance_state(&mut state_queue, val, self.target) {
                     return true;
                 }
-            } else {
-                let idx = state.val_idx;
-                state.advance_state(&mut state_queue, self.operands[idx], self.target);
             }
         }
         false
@@ -63,23 +61,33 @@ impl OperationState {
         }
     }
 
-    fn advance_state(self, queue: &mut VecDeque<OperationState>, val: u64, target: u64) {
+    fn advance_state(self, queue: &mut VecDeque<OperationState>, val: u64, target: u64) -> bool {
         // Add
         let add = self.state + val;
-        if add <= target {
+        if add == target {
+            return true;
+        }
+        if add < target {
             queue.push_back(OperationState::new(self.val_idx + 1, add));
         }
         // Mul
         let mul = self.state * val;
-        if mul <= target {
+        if mul == target {
+            return true;
+        }
+        if mul < target {
             queue.push_back(OperationState::new(self.val_idx + 1, mul));
         }
         // Concat
         let mut con = self.state.to_string();
         con.push_str(val.to_string().as_str());
         let con = con.parse::<u64>().unwrap();
-        if con <= target {
+        if con == target {
+            return true;
+        }
+        if con < target {
             queue.push_back(OperationState::new(self.val_idx + 1, con));
         }
+        false
     }
 }
