@@ -1,4 +1,3 @@
-use core::panic;
 use std::{cmp::Ordering, usize};
 
 // const INPUT: &'static str = include_str!("../test");
@@ -63,7 +62,6 @@ fn main() {
             }
         }
     }
-    println!("{virtual_idx}");
     println!("Part 2: {sum}");
 }
 
@@ -90,7 +88,41 @@ struct Memory(Vec<MemoryBlock>);
 
 impl Memory {
     fn sort_mem(&mut self) {
-        while let Some(_) = self.fill_next_empty() {}
+        for index in 0..self.0.len() {
+            let (a, b) = self.0.split_at_mut(index + 1);
+            let MemoryBlock::Empty(ref mut empty) = a[index] else {
+                continue;
+            };
+            for mem in b.iter_mut().rev() {
+                let MemoryBlock::File(f) = mem else {
+                    continue;
+                };
+                match empty.cap.cmp(&f.amount) {
+                    Ordering::Greater | Ordering::Equal => {
+                        empty.cap = empty.cap - f.amount;
+                        empty.used.push(File {
+                            id: f.id,
+                            amount: f.amount,
+                        });
+                        *mem = MemoryBlock::Empty(Empty {
+                            cap: 0,
+                            used: Vec::new(),
+                        });
+                    }
+                    Ordering::Less => {
+                        empty.used.push(File {
+                            id: f.id,
+                            amount: empty.cap,
+                        });
+                        f.amount -= empty.cap;
+                        empty.cap = 0;
+                    }
+                }
+                if empty.cap == 0 {
+                    break;
+                }
+            }
+        }
     }
 
     fn sort_mem_no_frag(&mut self) {
@@ -119,68 +151,5 @@ impl Memory {
                 }
             }
         }
-    }
-
-    fn fill_next_empty(&mut self) -> Option<()> {
-        let Some(position) = self.0.iter().position(|block| {
-            let MemoryBlock::Empty(e) = block else {
-                return false;
-            };
-            return e.cap != 0;
-        }) else {
-            return None;
-        };
-        let (a, b) = self.0.split_at_mut(position + 1);
-        let MemoryBlock::Empty(empty) = &mut a[position] else {
-            panic!()
-        };
-        let mut swapped: bool = false;
-        for block in b.iter_mut().rev() {
-            let MemoryBlock::File(file) = block else {
-                continue;
-            };
-            swapped = true;
-            let diff = empty.cap.abs_diff(file.amount);
-            match empty.cap.cmp(&file.amount) {
-                std::cmp::Ordering::Less => {
-                    file.amount = diff;
-                    empty.used.push(File {
-                        id: file.id,
-                        amount: empty.cap,
-                    });
-                    empty.cap = 0;
-                    break;
-                }
-                std::cmp::Ordering::Greater => {
-                    empty.cap = diff;
-                    empty.used.push(File {
-                        id: file.id,
-                        amount: file.amount,
-                    });
-                    *block = MemoryBlock::Empty(Empty {
-                        cap: 0,
-                        used: Vec::new(),
-                    })
-                }
-                std::cmp::Ordering::Equal => {
-                    empty.cap = 0;
-                    empty.used.push(File {
-                        id: file.id,
-                        amount: file.amount,
-                    });
-                    *block = MemoryBlock::Empty(Empty {
-                        cap: 0,
-                        used: Vec::new(),
-                    });
-                    break;
-                }
-            }
-        }
-
-        if !swapped {
-            return None;
-        }
-
-        Some(())
     }
 }
