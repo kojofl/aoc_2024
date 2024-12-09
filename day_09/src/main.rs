@@ -1,8 +1,8 @@
 use core::panic;
 use std::{cmp::Ordering, usize};
 
-const INPUT: &'static str = include_str!("../test");
-// const INPUT: &'static str = include_str!("../input");
+// const INPUT: &'static str = include_str!("../test");
+const INPUT: &'static str = include_str!("../input");
 
 fn main() {
     let mut memory = Memory(Vec::new());
@@ -63,6 +63,7 @@ fn main() {
             }
         }
     }
+    println!("{virtual_idx}");
     println!("Part 2: {sum}");
 }
 
@@ -97,7 +98,7 @@ impl Memory {
             let MemoryBlock::File(f) = self.0[index] else {
                 continue;
             };
-            for mem in self.0[..index.saturating_sub(1)].iter_mut() {
+            for mem in self.0[..index].iter_mut() {
                 let MemoryBlock::Empty(empty) = mem else {
                     continue;
                 };
