@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, usize};
+use std::{cmp::Ordering, hint::unreachable_unchecked, usize};
 
 // const INPUT: &'static str = include_str!("../test");
 const INPUT: &'static str = include_str!("../input");
@@ -88,18 +88,30 @@ struct Memory(Vec<MemoryBlock>);
 
 impl Memory {
     fn sort_mem(&mut self) {
-        for index in 0..self.0.len() {
-            let (a, b) = self.0.split_at_mut(index + 1);
-            let MemoryBlock::Empty(ref mut empty) = a[index] else {
-                continue;
+        let mut start = 0;
+        loop {
+            let Some(index) = self.0[start..].iter().position(|block| {
+                let MemoryBlock::Empty(e) = block else {
+                    return false;
+                };
+                return e.cap != 0;
+            }) else {
+                return;
             };
+            start = start + index + 1;
+            let (a, b) = unsafe { self.0.split_at_mut_unchecked(start) };
+            let MemoryBlock::Empty(empty) = &mut a[start - 1] else {
+                unsafe { unreachable_unchecked() };
+            };
+            let mut swapped = false;
             for mem in b.iter_mut().rev() {
                 let MemoryBlock::File(f) = mem else {
                     continue;
                 };
+                swapped = true;
                 match empty.cap.cmp(&f.amount) {
                     Ordering::Greater | Ordering::Equal => {
-                        empty.cap = empty.cap - f.amount;
+                        empty.cap -= f.amount;
                         empty.used.push(File {
                             id: f.id,
                             amount: f.amount,
@@ -116,11 +128,12 @@ impl Memory {
                         });
                         f.amount -= empty.cap;
                         empty.cap = 0;
+                        break;
                     }
                 }
-                if empty.cap == 0 {
-                    break;
-                }
+            }
+            if !swapped {
+                return;
             }
         }
     }
