@@ -84,7 +84,9 @@ impl Machine {
         };
         let (x_1, x_2) = Self::gaussian(a, b);
         let (x_1, x_2) = (x_1.round() as u64, x_2.round() as u64);
-        if self.a.0 * x_1 + self.b.0 * x_2 == self.goal.0 {
+        if self.a.0 * x_1 + self.b.0 * x_2 == self.goal.0
+            && self.a.1 * x_1 + self.b.1 * x_2 == self.goal.1
+        {
             return Some((x_1, x_2));
         }
         None
